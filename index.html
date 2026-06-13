@@ -1,373 +1,330 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Vietlott Pro 2.0</title>
+<title>Vietlott Pro Full</title>
 
 <style>
+*{box-sizing:border-box}
 
 body{
-font-family:Arial,sans-serif;
 margin:0;
-padding:20px;
+padding:15px;
+font-family:Arial,sans-serif;
+background:linear-gradient(135deg,#fff7e6,#ffe9e9);
 text-align:center;
-background:#f5f5f5;
-transition:0.3s;
 }
 
-.dark{
-background:#121212;
-color:white;
+.header{
+background:#c62828;
+color:#fff;
+padding:15px;
+border-radius:15px;
+font-size:28px;
+font-weight:bold;
+margin-bottom:15px;
 }
 
-h1{
-color:#d32f2f;
+.card{
+background:#fff;
+padding:15px;
+border-radius:15px;
+margin-bottom:15px;
+box-shadow:0 3px 10px rgba(0,0,0,.15);
 }
 
-select,
-button{
+select{
+width:100%;
 padding:12px;
 font-size:18px;
 border-radius:10px;
-border:none;
-margin:5px;
+border:2px solid #fbc02d;
 }
 
 button{
+cursor:pointer;
+}
+
+.mainButton{
+width:100%;
+padding:15px;
+font-size:22px;
+font-weight:bold;
+border:none;
+border-radius:12px;
 background:#d32f2f;
-color:white;
+color:#fff;
+margin-top:10px;
+}
+
+.quickBox{
+display:flex;
+gap:10px;
+margin-top:10px;
+}
+
+.quickBtn{
+flex:1;
+padding:12px;
+border:none;
+border-radius:10px;
+background:#fbc02d;
+font-weight:bold;
 }
 
 .ball{
 width:60px;
 height:60px;
-border-radius:50%;
-background:#ff9800;
-color:white;
 display:inline-flex;
 justify-content:center;
 align-items:center;
+border-radius:50%;
+margin:5px;
 font-size:22px;
 font-weight:bold;
-margin:5px;
-box-shadow:0 4px 8px rgba(0,0,0,.3);
+background:radial-gradient(circle,#fff176,#fbc02d);
+box-shadow:0 3px 8px rgba(0,0,0,.2);
 }
 
-.card{
-background:white;
-padding:15px;
-border-radius:12px;
-margin-top:15px;
+.number3d{
+font-size:42px;
+font-weight:bold;
+color:#c62828;
+margin:10px;
+letter-spacing:5px;
 }
 
-.dark .card{
-background:#222;
+.sectionTitle{
+font-size:20px;
+font-weight:bold;
+margin-bottom:10px;
 }
 
-.history-item{
-padding:8px;
-border-bottom:1px solid #ddd;
-font-size:14px;
+.historyItem{
 text-align:left;
+padding:8px;
+border-bottom:1px solid #eee;
+font-size:14px;
 }
 
-.dark .history-item{
-border-color:#444;
+.starBox{
+padding:10px;
+background:#fff9c4;
+border-radius:10px;
+margin-top:10px;
+font-size:14px;
 }
 
+.small{
+font-size:13px;
+color:#666;
+}
 </style>
-
 </head>
 
 <body>
 
-<h1>🎰 Vietlott Pro 2.0</h1>
+<div class="header">🎰 Vietlott Pro FULL</div>
 
-<select id="gameMode">
+<div class="card">
 
-<option value="mega">
-Mega 6/45
-</option>
+<div class="sectionTitle">Chọn chế độ</div>
 
-<option value="power">
-Power 6/55
-</option>
-
-<option value="3d">
-3D Max Pro
-</option>
-
+<select id="mode">
+<option value="mega">Mega 6/45</option>
+<option value="power">Power 6/55</option>
+<option value="3d">3D Slot</option>
 </select>
 
-<br>
+<button class="mainButton" onclick="quay()">🎲 QUAY NGAY</button>
 
-<button onclick="quaySo()">
-🎲 Quay số
-</button>
-
-<div id="result" class="card">
-Chưa có kết quả
+<div class="quickBox">
+<button class="quickBtn" onclick="auto(10)">10 lần</button>
+<button class="quickBtn" onclick="auto(50)">50 lần</button>
 </div>
 
-<div class="card">
-
-<h3>⚙️ Cài đặt</h3>
-
-<label>
-<input type="checkbox" id="soundSwitch">
-Âm thanh
-</label>
-
-<br><br>
-
-<label>
-<input type="checkbox" id="darkSwitch">
-Dark Mode
-</label>
+<div class="small">💡 Có lưu lịch sử + yêu thích + thống kê</div>
 
 </div>
 
 <div class="card">
+<div class="sectionTitle">🎯 Kết quả</div>
+<div id="result">Chưa có kết quả</div>
+</div>
 
-<h3>📜 Lịch sử</h3>
+<div class="card">
+<div class="sectionTitle">⭐ Yêu thích</div>
+<div id="fav">Chưa có</div>
+</div>
 
-<button onclick="xoaLichSu()">
-🗑️ Xóa lịch sử
-</button>
+<div class="card">
+<div class="sectionTitle">📊 Thống kê</div>
+<div id="stats">Chưa có dữ liệu</div>
+</div>
 
-<div id="history"></div>
-
+<div class="card">
+<div class="sectionTitle">📜 Lịch sử</div>
+<div id="history">Chưa có lịch sử</div>
 </div>
 
 <script>
-    let soundEnabled =
-localStorage.getItem("soundEnabled") !== "false";
 
-let darkEnabled =
-localStorage.getItem("darkEnabled") === "true";
+let hist=[];
+let stats={};
+let fav="";
+let running=false;
 
-document.getElementById("soundSwitch").checked =
-soundEnabled;
-
-document.getElementById("darkSwitch").checked =
-darkEnabled;
-
-if(darkEnabled){
-document.body.classList.add("dark");
+/* âm thanh nhẹ */
+function tick(){
+  let ctx=new (window.AudioContext||webkitAudioContext)();
+  let o=ctx.createOscillator();
+  let g=ctx.createGain();
+  o.type="square";
+  o.frequency.value=900;
+  g.gain.value=0.03;
+  o.connect(g);
+  g.connect(ctx.destination);
+  o.start();
+  o.stop(ctx.currentTime+0.04);
 }
 
-document.getElementById("soundSwitch")
-.addEventListener("change",function(){
-
-soundEnabled=this.checked;
-
-localStorage.setItem(
-"soundEnabled",
-soundEnabled
-);
-
-});
-
-document.getElementById("darkSwitch")
-.addEventListener("change",function(){
-
-darkEnabled=this.checked;
-
-document.body.classList.toggle(
-"dark",
-darkEnabled
-);
-
-localStorage.setItem(
-"darkEnabled",
-darkEnabled
-);
-
-});
-
-function beep(){
-
-if(!soundEnabled) return;
-
-let ctx =
-new (window.AudioContext ||
-window.webkitAudioContext)();
-
-let osc =
-ctx.createOscillator();
-
-osc.type="sine";
-
-osc.frequency.value=800;
-
-osc.connect(ctx.destination);
-
-osc.start();
-
-setTimeout(()=>{
-osc.stop();
-},100);
-
+/* random */
+function randUnique(c,max){
+  let a=[];
+  while(a.length<c){
+    let n=Math.floor(Math.random()*max)+1;
+    if(!a.includes(n)) a.push(n);
+  }
+  return a.sort((x,y)=>x-y);
 }
 
-function saveHistory(text){
+/* slot */
+function spin(el,final,max,delay,digits){
+  let i=0;
+  let t=setInterval(()=>{
+    el.innerText=(Math.floor(Math.random()*max)+1)
+      .toString().padStart(digits,"0");
 
-let history =
-JSON.parse(
-localStorage.getItem("history") || "[]"
-);
+    tick();
+    i++;
 
-history.unshift(text);
-
-if(history.length>100){
-history.pop();
+    if(i>18){
+      clearInterval(t);
+      el.innerText=final.toString().padStart(digits,"0");
+    }
+  },delay);
 }
 
-localStorage.setItem(
-"history",
-JSON.stringify(history)
-);
-
-loadHistory();
-
+/* update */
+function updateHistory(t){
+  hist.unshift(t);
+  if(hist.length>30) hist.pop();
+  document.getElementById("history").innerHTML=
+  hist.map(i=>`<div class="historyItem">${i}</div>`).join("");
 }
 
-function loadHistory(){
+function updateStats(nums){
+  nums.forEach(n=>{
+    stats[n]=(stats[n]||0)+1;
+  });
 
-let history =
-JSON.parse(
-localStorage.getItem("history") || "[]"
-);
+  let top="-",max=0;
+  for(let k in stats){
+    if(stats[k]>max){
+      max=stats[k];
+      top=k;
+    }
+  }
 
-let html="";
-
-history.forEach(item=>{
-
-html +=
-`<div class="history-item">${item}</div>`;
-
-});
-
-document.getElementById("history")
-.innerHTML=html;
-
+  document.getElementById("stats").innerHTML=
+  `🔥 Hot number: <b>${top}</b> (${max} lần)`;
 }
 
-function xoaLichSu(){
+/* main */
+function quay(){
 
-if(confirm("Xóa toàn bộ lịch sử?")){
+  if(running) return;
+  running=true;
 
-localStorage.removeItem("history");
+  let m=document.getElementById("mode").value;
+  let r=document.getElementById("result");
+  r.innerHTML="";
 
-loadHistory();
+  /* MEGA */
+  if(m==="mega"){
+    let n=randUnique(6,45);
+    r.innerHTML="🎰 Mega 6/45";
 
+    n.forEach(x=>{
+      let d=document.createElement("div");
+      d.className="ball";
+      d.innerText="00";
+      r.appendChild(d);
+      setTimeout(()=>spin(d,x,45,120,2),Math.random()*300);
+    });
+
+    setTimeout(()=>{
+      updateHistory("Mega: "+n.join("-"));
+      updateStats(n);
+      fav=n.join(" - ");
+      document.getElementById("fav").innerText=fav;
+      running=false;
+    },2200);
+  }
+
+  /* POWER */
+  else if(m==="power"){
+    let n=randUnique(6,55);
+    r.innerHTML="⚡ Power 6/55";
+
+    n.forEach(x=>{
+      let d=document.createElement("div");
+      d.className="ball";
+      d.innerText="00";
+      r.appendChild(d);
+      setTimeout(()=>spin(d,x,55,120,2),Math.random()*300);
+    });
+
+    setTimeout(()=>{
+      updateHistory("Power: "+n.join("-"));
+      updateStats(n);
+      fav=n.join(" - ");
+      document.getElementById("fav").innerText=fav;
+      running=false;
+    },2300);
+  }
+
+  /* 3D */
+  else{
+    let a=Math.floor(Math.random()*1000).toString().padStart(3,"0");
+    let b=Math.floor(Math.random()*1000).toString().padStart(3,"0");
+
+    r.innerHTML=`
+      <div class="number3d" id="a">000</div>
+      <div class="number3d" id="b">000</div>
+    `;
+
+    spin(aEl=document.getElementById("a"),a,1000,140,3);
+
+    setTimeout(()=>{
+      spin(bEl=document.getElementById("b"),b,1000,160,3);
+    },600);
+
+    setTimeout(()=>{
+      updateHistory("3D: "+a+" | "+b);
+      fav=a+" | "+b;
+      document.getElementById("fav").innerText=fav;
+      running=false;
+    },2500);
+  }
 }
 
+/* auto demo */
+function auto(n){
+  alert("Chế độ demo "+n+" lần (giữ nhẹ máy)");
 }
-
-function quaySo(){
-
-let mode =
-document.getElementById("gameMode").value;
-
-let arr=[];
-
-let title="";
-
-if(mode==="mega"){
-
-title="🎰 Mega 6/45";
-
-while(arr.length<6){
-
-let n=
-Math.floor(Math.random()*45)+1;
-
-if(!arr.includes(n)){
-arr.push(n);
-}
-
-}
-
-arr.sort((a,b)=>a-b);
-
-}
-
-else if(mode==="power"){
-
-title="⚡ Power 6/55";
-
-while(arr.length<6){
-
-let n=
-Math.floor(Math.random()*55)+1;
-
-if(!arr.includes(n)){
-arr.push(n);
-}
-
-}
-
-arr.sort((a,b)=>a-b);
-
-}
-
-else{
-
-title="🎯 3D Max Pro";
-
-let number=
-Math.floor(
-Math.random()*1000
-)
-.toString()
-.padStart(3,"0");
-
-arr=[number];
-
-}
-
-let html=
-`<h3>${title}</h3>`;
-
-arr.forEach(n=>{
-
-if(mode==="3d"){
-
-html+=
-`<h1>${n}</h1>`;
-
-}else{
-
-html+=
-`<div class="ball">${n}</div>`;
-
-}
-
-});
-
-document.getElementById("result")
-.innerHTML=html;
-
-let now=
-new Date();
-
-let time=
-now.toLocaleString();
-
-saveHistory(
-time + " - " +
-title + " - " +
-arr.join(" ")
-);
-
-beep();
-
-}
-
-loadHistory();
 
 </script>
 
