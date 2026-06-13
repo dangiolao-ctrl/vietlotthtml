@@ -3,85 +3,160 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vietlott Pro</title>
+
+<title>Vietlott Pro 2.0</title>
 
 <style>
+
 body{
-    font-family:Arial,sans-serif;
-    text-align:center;
-    background:#f5f5f5;
-    margin:0;
-    padding:20px;
+font-family:Arial,sans-serif;
+margin:0;
+padding:20px;
+text-align:center;
+background:#f5f5f5;
+transition:0.3s;
+}
+
+.dark{
+background:#121212;
+color:white;
 }
 
 h1{
-    color:#d32f2f;
+color:#d32f2f;
 }
 
-.ball{
-    width:60px;
-    height:60px;
-    border-radius:50%;
-    background:#ff9800;
-    color:white;
-    display:inline-flex;
-    justify-content:center;
-    align-items:center;
-    font-size:24px;
-    font-weight:bold;
-    margin:5px;
-    box-shadow:0 4px 8px rgba(0,0,0,0.3);
+select,
+button{
+padding:12px;
+font-size:18px;
+border-radius:10px;
+border:none;
+margin:5px;
 }
 
 button{
-    padding:12px 20px;
-    font-size:18px;
-    border:none;
-    border-radius:10px;
-    background:#d32f2f;
-    color:white;
-    margin-top:15px;
+background:#d32f2f;
+color:white;
 }
 
-.settings{
-    margin-top:25px;
-    background:white;
-    padding:15px;
-    border-radius:12px;
+.ball{
+width:60px;
+height:60px;
+border-radius:50%;
+background:#ff9800;
+color:white;
+display:inline-flex;
+justify-content:center;
+align-items:center;
+font-size:22px;
+font-weight:bold;
+margin:5px;
+box-shadow:0 4px 8px rgba(0,0,0,.3);
 }
 
-label{
-    font-size:18px;
+.card{
+background:white;
+padding:15px;
+border-radius:12px;
+margin-top:15px;
 }
+
+.dark .card{
+background:#222;
+}
+
+.history-item{
+padding:8px;
+border-bottom:1px solid #ddd;
+font-size:14px;
+text-align:left;
+}
+
+.dark .history-item{
+border-color:#444;
+}
+
 </style>
+
 </head>
 
 <body>
 
-<h1>🎰 Vietlott Pro</h1>
+<h1>🎰 Vietlott Pro 2.0</h1>
 
-<div id="result"></div>
+<select id="gameMode">
+
+<option value="mega">
+Mega 6/45
+</option>
+
+<option value="power">
+Power 6/55
+</option>
+
+<option value="3d">
+3D Max Pro
+</option>
+
+</select>
+
+<br>
 
 <button onclick="quaySo()">
 🎲 Quay số
 </button>
 
-<div class="settings">
+<div id="result" class="card">
+Chưa có kết quả
+</div>
+
+<div class="card">
+
 <h3>⚙️ Cài đặt</h3>
 
 <label>
 <input type="checkbox" id="soundSwitch">
- Bật âm thanh
+Âm thanh
 </label>
+
+<br><br>
+
+<label>
+<input type="checkbox" id="darkSwitch">
+Dark Mode
+</label>
+
+</div>
+
+<div class="card">
+
+<h3>📜 Lịch sử</h3>
+
+<button onclick="xoaLichSu()">
+🗑️ Xóa lịch sử
+</button>
+
+<div id="history"></div>
+
 </div>
 
 <script>
-
-let soundEnabled =
+    let soundEnabled =
 localStorage.getItem("soundEnabled") !== "false";
+
+let darkEnabled =
+localStorage.getItem("darkEnabled") === "true";
 
 document.getElementById("soundSwitch").checked =
 soundEnabled;
+
+document.getElementById("darkSwitch").checked =
+darkEnabled;
+
+if(darkEnabled){
+document.body.classList.add("dark");
+}
 
 document.getElementById("soundSwitch")
 .addEventListener("change",function(){
@@ -95,6 +170,23 @@ soundEnabled
 
 });
 
+document.getElementById("darkSwitch")
+.addEventListener("change",function(){
+
+darkEnabled=this.checked;
+
+document.body.classList.toggle(
+"dark",
+darkEnabled
+);
+
+localStorage.setItem(
+"darkEnabled",
+darkEnabled
+);
+
+});
+
 function beep(){
 
 if(!soundEnabled) return;
@@ -103,7 +195,8 @@ let ctx =
 new (window.AudioContext ||
 window.webkitAudioContext)();
 
-let osc = ctx.createOscillator();
+let osc =
+ctx.createOscillator();
 
 osc.type="sine";
 
@@ -119,13 +212,96 @@ osc.stop();
 
 }
 
+function saveHistory(text){
+
+let history =
+JSON.parse(
+localStorage.getItem("history") || "[]"
+);
+
+history.unshift(text);
+
+if(history.length>100){
+history.pop();
+}
+
+localStorage.setItem(
+"history",
+JSON.stringify(history)
+);
+
+loadHistory();
+
+}
+
+function loadHistory(){
+
+let history =
+JSON.parse(
+localStorage.getItem("history") || "[]"
+);
+
+let html="";
+
+history.forEach(item=>{
+
+html +=
+`<div class="history-item">${item}</div>`;
+
+});
+
+document.getElementById("history")
+.innerHTML=html;
+
+}
+
+function xoaLichSu(){
+
+if(confirm("Xóa toàn bộ lịch sử?")){
+
+localStorage.removeItem("history");
+
+loadHistory();
+
+}
+
+}
+
 function quaySo(){
+
+let mode =
+document.getElementById("gameMode").value;
 
 let arr=[];
 
+let title="";
+
+if(mode==="mega"){
+
+title="🎰 Mega 6/45";
+
 while(arr.length<6){
 
-let n =
+let n=
+Math.floor(Math.random()*45)+1;
+
+if(!arr.includes(n)){
+arr.push(n);
+}
+
+}
+
+arr.sort((a,b)=>a-b);
+
+}
+
+else if(mode==="power"){
+
+title="⚡ Power 6/55";
+
+while(arr.length<6){
+
+let n=
 Math.floor(Math.random()*55)+1;
 
 if(!arr.includes(n)){
@@ -136,21 +312,62 @@ arr.push(n);
 
 arr.sort((a,b)=>a-b);
 
-let html="";
+}
 
-for(let n of arr){
+else{
 
-html +=
+title="🎯 3D Max Pro";
+
+let number=
+Math.floor(
+Math.random()*1000
+)
+.toString()
+.padStart(3,"0");
+
+arr=[number];
+
+}
+
+let html=
+`<h3>${title}</h3>`;
+
+arr.forEach(n=>{
+
+if(mode==="3d"){
+
+html+=
+`<h1>${n}</h1>`;
+
+}else{
+
+html+=
 `<div class="ball">${n}</div>`;
 
 }
 
+});
+
 document.getElementById("result")
 .innerHTML=html;
+
+let now=
+new Date();
+
+let time=
+now.toLocaleString();
+
+saveHistory(
+time + " - " +
+title + " - " +
+arr.join(" ")
+);
 
 beep();
 
 }
+
+loadHistory();
 
 </script>
 
