@@ -1,27 +1,157 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-<meta charset="utf-8">
-<title>Vietlott Demo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vietlott Pro</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    text-align:center;
+    background:#f5f5f5;
+    margin:0;
+    padding:20px;
+}
+
+h1{
+    color:#d32f2f;
+}
+
+.ball{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    background:#ff9800;
+    color:white;
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
+    font-size:24px;
+    font-weight:bold;
+    margin:5px;
+    box-shadow:0 4px 8px rgba(0,0,0,0.3);
+}
+
+button{
+    padding:12px 20px;
+    font-size:18px;
+    border:none;
+    border-radius:10px;
+    background:#d32f2f;
+    color:white;
+    margin-top:15px;
+}
+
+.settings{
+    margin-top:25px;
+    background:white;
+    padding:15px;
+    border-radius:12px;
+}
+
+label{
+    font-size:18px;
+}
+</style>
 </head>
+
 <body>
-<h1>Chào Mộc Dương</h1>
-<p>Web Vietlott đang hoạt động.</p>
 
-<button onclick="quay()">Quay số</button>
+<h1>🎰 Vietlott Pro</h1>
 
-<h2 id="kq">--</h2>
+<div id="result"></div>
+
+<button onclick="quaySo()">
+🎲 Quay số
+</button>
+
+<div class="settings">
+<h3>⚙️ Cài đặt</h3>
+
+<label>
+<input type="checkbox" id="soundSwitch">
+ Bật âm thanh
+</label>
+</div>
 
 <script>
-function quay(){
- let so=[];
- while(so.length<6){
-   let n=Math.floor(Math.random()*55)+1;
-   if(!so.includes(n)) so.push(n);
- }
- so.sort((a,b)=>a-b);
- document.getElementById("kq").innerHTML=so.join(" - ");
+
+let soundEnabled =
+localStorage.getItem("soundEnabled") !== "false";
+
+document.getElementById("soundSwitch").checked =
+soundEnabled;
+
+document.getElementById("soundSwitch")
+.addEventListener("change",function(){
+
+soundEnabled=this.checked;
+
+localStorage.setItem(
+"soundEnabled",
+soundEnabled
+);
+
+});
+
+function beep(){
+
+if(!soundEnabled) return;
+
+let ctx =
+new (window.AudioContext ||
+window.webkitAudioContext)();
+
+let osc = ctx.createOscillator();
+
+osc.type="sine";
+
+osc.frequency.value=800;
+
+osc.connect(ctx.destination);
+
+osc.start();
+
+setTimeout(()=>{
+osc.stop();
+},100);
+
 }
+
+function quaySo(){
+
+let arr=[];
+
+while(arr.length<6){
+
+let n =
+Math.floor(Math.random()*55)+1;
+
+if(!arr.includes(n)){
+arr.push(n);
+}
+
+}
+
+arr.sort((a,b)=>a-b);
+
+let html="";
+
+for(let n of arr){
+
+html +=
+`<div class="ball">${n}</div>`;
+
+}
+
+document.getElementById("result")
+.innerHTML=html;
+
+beep();
+
+}
+
 </script>
 
 </body>
